@@ -41,7 +41,7 @@ __END__
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff0000', endColorstr='#ffffff',GradientType=1 );
     }
   </style>
-  <p><img id="bat" src="https://s3.amazonaws.com/actionkit.democracyforamerica/images/baseball_bat.png" style="background-color:#f00;"></p>
+  <p><img id="bat" src="<%= request.base_url %>/img/baseball_bat.png" style="background-color:#f00;"></p>
   <p><%= @goal_type %>: <%= @results[@goal_type].to_i %></p>
   <p>goal: <%= @goal %></p>
   <p><%= @kit %>
