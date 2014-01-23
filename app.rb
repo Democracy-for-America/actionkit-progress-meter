@@ -7,7 +7,7 @@ Dotenv.load
 
 @@connection = Mysql2::Client.new(host: ENV['HOST'], username: ENV['USERNAME'], password: ENV['PASSWORD'], database: ENV['DATABASE'])
 
-def load_variables_from_actionkit
+before do
   @results = params[:page_id] ? @@connection.query("SELECT COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_action a LEFT JOIN core_order o ON a.id = o.action_id WHERE a.page_id = #{params[:page_id] || 3650}").first : {'actions' => 500, 'dollars' => 500}
   @goal = params['goal'] || 1000
   @goal_type = params['goal_type'] || 'actions'
@@ -16,13 +16,11 @@ def load_variables_from_actionkit
 end
 
 get '/baseball_bat' do
-  load_variables_from_actionkit
   erb :bat_template
 end
 
 get '/baseball_bat.png' do
   content_type 'image/png'
-  load_variables_from_actionkit
   @kit = IMGKit.new(erb :bat_template).to_png
 end
 
