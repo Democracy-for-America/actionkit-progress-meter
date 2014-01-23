@@ -21,7 +21,7 @@ end
 
 get '/baseball_bat.png' do
   content_type 'image/png'
-  @kit = IMGKit.new(erb :bat_template).to_png
+  IMGKit.new(erb :bat_template).to_png
 end
 
 __END__
@@ -42,4 +42,3 @@ __END__
   <p><img id="bat" src="<%= request.base_url %>/img/baseball_bat.png" style="background-color:#f00;"></p>
   <p><%= @goal_type %>: <%= @results[@goal_type].to_i %></p>
   <p>goal: <%= @goal %></p>
-  <p><%= @kit %>
