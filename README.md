@@ -5,6 +5,7 @@ Generate custom progress meters for ActionKit pages with Sinatra + [IMGKit](http
 
 Requirements:
 ---------------
+
 - ruby
 - sinatra
 - [wkhtmltoimage](https://code.google.com/p/wkhtmltopdf/downloads/detail?name=wkhtmltoimage-0.11.0_rc1-static-amd64.tar.bz2&can=2&q=)
@@ -21,14 +22,16 @@ Set-up:
 
 Running on Heroku:
 ---------------
-    $ heroku apps:create
+
+    $ heroku apps create
     $ git push heroku master
     # set up your MySQL connection:
     $ heroku config:set USERNAME='username' PASSWORD='password' HOST='example.client-db.actionkit.com' DATABASE='ak_example'
 
 In Action:
 ---------------
-    http://actionkit-progress-meter.herokuapp.com/baseball_bat.png?page_id=3650&goal_type=dollars&goal=40000
+
+[http://actionkit-progress-meter.herokuapp.com/baseball_bat.png?page_id=3650&goal_type=dollars&goal=40000](http://actionkit-progress-meter.herokuapp.com/baseball_bat.png?page_id=3650&goal_type=dollars&goal=40000)
 
 `page_id` is the page_id of the ActionKit page to pull progress from.
 
