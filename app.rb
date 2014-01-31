@@ -8,7 +8,8 @@ Dotenv.load
 @@connection = Mysql2::Client.new(host: ENV['HOST'], username: ENV['USERNAME'], password: ENV['PASSWORD'], database: ENV['DATABASE'])
 
 before do
-  @results = params[:page_id] ? @@connection.query("SELECT COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_action a LEFT JOIN core_order o ON a.id = o.action_id WHERE a.page_id = #{params[:page_id] || 3650}").first : {'actions' => 500, 'dollars' => 500}
+  @sanitized_page_id = params[:page_id] ? params[:page_id].gsub(/[^0-9]/,'') : 3650
+  @results = params[:page_id] ? @@connection.query("SELECT COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_action a LEFT JOIN core_order o ON a.id = o.action_id WHERE a.page_id = #{@sanitized_page_id || 3650}").first : {'actions' => 500, 'dollars' => 500}
   @goal = params['goal'] || 1000
   @goal_type = params['goal_type'] || 'actions'
   @progress = @results[@goal_type]
