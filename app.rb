@@ -38,7 +38,7 @@ get '/:page_id/:goal_type/:goal/baseball_bat.png' do
   content_type 'image/png'
   calculate_progress
   object = @@s3_bucket.objects["#{@sanitized_page_id}/#{@goal_type}/#{@goal}/baseball_bat.png"]
-  if object.exists? && Time.now - object.last_modified < 300 && object.metadata['progress'] = @progress.to_s
+  if object.exists? && (Time.now - object.last_modified < 300 || object.metadata['progress'] != @progress.to_s)
     img = object.read
   else
     img = IMGKit.new(erb :bat_template).to_png
