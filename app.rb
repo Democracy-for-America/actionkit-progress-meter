@@ -38,6 +38,7 @@ get '/:page_id/:goal_type/:goal/baseball_bat.png' do
   content_type 'image/png'
   calculate_progress
   object = @@s3_bucket.objects["#{@sanitized_page_id}/#{@goal_type}/#{@goal}/baseball_bat.png"]
+<<<<<<< HEAD
   unless object.exists? && (Time.now - object.last_modified < 300 || object.metadata['progress'] == @progress.to_s)
     Thread.new {
     img = IMGKit.new(erb :bat_template).to_png
@@ -46,6 +47,16 @@ get '/:page_id/:goal_type/:goal/baseball_bat.png' do
     }
   end
   redirect object.public_url
+=======
+  if object.exists? && (Time.now - object.last_modified < 300 || object.metadata['progress'] != @progress.to_s)
+    img = object.read
+  else
+    img = IMGKit.new(erb :bat_template).to_png
+    object.write(img)
+    object.metadata['progress'] = @progress
+  end
+  img
+>>>>>>> add_s3_for_caching
 end
 
 __END__
