@@ -12,8 +12,8 @@ Dotenv.load
 
 # Prepare API connection with Amazon S3
 @@s3_bucket = AWS::S3.new(
-  :access_key_id => ENV['ACCESS_KEY_ID'],
-  :secret_access_key => ENV['SECRET_ACCESS_KEY']
+  access_key_id: ENV['ACCESS_KEY_ID'],
+  secret_access_key: ENV['SECRET_ACCESS_KEY']
 ).buckets[ENV['BUCKET_NAME']]
 
 # Calculate progress towards goal
@@ -27,6 +27,12 @@ def calculate_progress
   @percent = [99, 8 + 92 * @progress.to_i / @goal.to_i].min
 end
 
+# Render an image of an HTML template, and upload to S3
+def render_image_and_save_to_s3(object)
+  img = IMGKit.new(erb :bat_template).to_png
+  object.write(img)
+end
+
 # Generate a custom progress meter using an HTML template
 get '/:page_id/:goal_type/:goal/baseball_bat' do
   calculate_progress
@@ -38,25 +44,18 @@ get '/:page_id/:goal_type/:goal/baseball_bat.png' do
   content_type 'image/png'
   calculate_progress
   object = @@s3_bucket.objects["#{@sanitized_page_id}/#{@goal_type}/#{@goal}/baseball_bat.png"]
-<<<<<<< HEAD
-  unless object.exists? && (Time.now - object.last_modified < 300 || object.metadata['progress'] == @progress.to_s)
-    Thread.new {
-    img = IMGKit.new(erb :bat_template).to_png
-    object.write(img)
+  case
+  when object.exists? == false
+    # When the image doesn't exist, create it immediately
+    render_image_and_save_to_s3(object)
     object.metadata['progress'] = @progress
-    }
+  when Time.now - object.last_modified > 300 && object.metadata['progress'] != @progress.to_s
+    # When the time since the image has last been updated is over 300 seconds
+    # and the goal progress has changed, update the image via a background process
+    object.metadata['progress'] = @progress
+    Thread.new { render_image_and_save_to_s3(object) }
   end
   redirect object.public_url
-=======
-  if object.exists? && (Time.now - object.last_modified < 300 || object.metadata['progress'] != @progress.to_s)
-    img = object.read
-  else
-    img = IMGKit.new(erb :bat_template).to_png
-    object.write(img)
-    object.metadata['progress'] = @progress
-  end
-  img
->>>>>>> add_s3_for_caching
 end
 
 __END__
