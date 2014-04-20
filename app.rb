@@ -29,7 +29,7 @@ end
 
 # Render an image of an HTML template, and upload to S3
 def render_image_and_save_to_s3(object)
-  img = IMGKit.new(erb :bat_template).to_png
+  img = IMGKit.new(erb(:bat_template), width: 256, height: 384).to_png
   object.write(img)
 end
 
