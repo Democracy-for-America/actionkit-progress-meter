@@ -3,6 +3,7 @@ require 'mysql2'
 require 'aws-sdk'
 require 'imgkit'
 require 'dotenv'
+require 'digest/md5'
 
 # Load environment variables
 Dotenv.load
@@ -16,15 +17,36 @@ Dotenv.load
   secret_access_key: ENV['SECRET_ACCESS_KEY']
 ).buckets[ENV['BUCKET_NAME']]
 
-# Calculate progress towards goal
-def calculate_progress
-  @time = Time.now
-  @sanitized_page_id = params['page_id'] ? params['page_id'].gsub(/[^0-9]/,'') : 3650
-  @results = params['page_id'] ? @@connection.query("SELECT COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_action a LEFT JOIN core_order o ON a.id = o.action_id WHERE a.page_id = #{@sanitized_page_id || 3650}").first : {'actions' => 500, 'dollars' => 500}
-  @goal = params['goal'] || 1000
-  @goal_type = params['goal_type'] || 'actions'
-  @progress = @results[@goal_type]
-  @percent = [99, 8 + 92 * @progress.to_i / @goal.to_i].min
+helpers do
+  # Basic Auth helpers
+  def protected!
+    return if authorized?
+    headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
+    halt 401, "Not authorized"
+  end
+  def authorized?
+    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+    @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [ENV['BASIC_AUTH_USER'], ENV['BASIC_AUTH_PASSWORD']]
+  end
+
+  # Check validity of hash
+  def valid_hash?
+    unless params['hash'] == @valid_hash
+      halt 404, "Not found"
+    end
+  end
+
+  # Calculate progress towards goal
+  def calculate_progress
+    @time = Time.now
+    @sanitized_page_id = params['page_id'].gsub(/[^0-9]/,'')
+    @results = @@connection.query("SELECT p.created_at, COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_page p LEFT JOIN core_action a ON p.id = a.page_id LEFT JOIN core_order o ON a.id = o.action_id WHERE p.id = #{@sanitized_page_id}").first
+    @valid_hash = Digest::MD5.new.update("#{ENV['SALT']}#{@results['created_at']}#{@sanitized_page_id}").to_s
+    @goal = params['goal']
+    @goal_type = params['goal_type']
+    @progress = @results[@goal_type]
+    @percent = [99, 8 + 92 * @progress.to_i / @goal.to_i].min
+  end
 end
 
 # Render an image of an HTML template, and upload to S3
@@ -33,16 +55,25 @@ def render_image_and_save_to_s3(object)
   object.write(img)
 end
 
-# Generate a custom progress meter using an HTML template
-get '/:page_id/:goal_type/:goal/baseball_bat' do
+# Display the path for a page's progress meter
+get '/show/:page_id/:goal_type/:goal/baseball_bat' do
+  protected!
   calculate_progress
+  return "#{request.host_with_port}/#{@sanitized_page_id}/#{@valid_hash}/#{@goal_type}/#{@goal}/baseball_bat.png"
+end
+
+# Generate a custom progress meter using an HTML template
+get '/:page_id/:hash/:goal_type/:goal/baseball_bat' do
+  calculate_progress
+  valid_hash?
   erb :bat_template
 end
 
 # Generate a .png from the HTML template
-get '/:page_id/:goal_type/:goal/baseball_bat.png' do
+get '/:page_id/:hash/:goal_type/:goal/baseball_bat.png' do
   content_type 'image/png'
   calculate_progress
+  valid_hash?
   object = @@s3_bucket.objects["#{@sanitized_page_id}/#{@goal_type}/#{@goal}/baseball_bat.png"]
   case
   when object.exists? == false
