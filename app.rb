@@ -55,11 +55,15 @@ def render_image_and_save_to_s3(object)
   object.write(img)
 end
 
+get '/create' do
+  erb :create
+end
+
 # Display the path for a page's progress meter
-get '/show/:page_id/:goal_type/:goal/baseball_bat' do
+get '/show' do
   protected!
   calculate_progress
-  return "#{request.host_with_port}/#{@sanitized_page_id}/#{@valid_hash}/#{@goal_type}/#{@goal}/baseball_bat.png"
+  erb :show
 end
 
 # Generate a custom progress meter using an HTML template
@@ -88,17 +92,3 @@ get '/:page_id/:hash/:goal_type/:goal/baseball_bat.png' do
   end
   redirect object.public_url
 end
-
-__END__
-
-@@bat_template
-  <style>
-    #bat {
-    background: #ff0000;
-    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ff0000), color-stop(<%= @percent %>%,#ff0000), color-stop(<%= @percent %>%,#ffffff), color-stop(100%,#ffffff));
-    background: -webkit-linear-gradient(45deg, #ff0000 0%,#ff0000 <%= @percent %>%,#ffffff <%= @percent %>%,#ffffff 100%);
-    }
-  </style>
-  <p><img id="bat" src="<%= request.base_url %>/img/baseball_bat.png" style="background-color:#f00;"></p>
-  <p><%= "#{@goal_type}: #{@progress}" %></p>
-  <p>goal: <%= @goal %></p>
