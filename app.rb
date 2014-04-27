@@ -9,13 +9,13 @@ require 'digest/md5'
 Dotenv.load
 
 # Prepare MYSQL connection with ActionKit
-@@connection = Mysql2::Client.new(host: ENV['HOST'], username: ENV['USERNAME'], password: ENV['PASSWORD'], database: ENV['DATABASE'])
+@@connection = Mysql2::Client.new(host: ENV['AK_HOST'], username: ENV['AK_USERNAME'], password: ENV['AK_PASSWORD'], database: ENV['AK_DATABASE'])
 
 # Prepare API connection with Amazon S3
 @@s3_bucket = AWS::S3.new(
-  access_key_id: ENV['ACCESS_KEY_ID'],
-  secret_access_key: ENV['SECRET_ACCESS_KEY']
-).buckets[ENV['BUCKET_NAME']]
+  access_key_id: ENV['S3_ACCESS_KEY_ID'],
+  secret_access_key: ENV['S3_SECRET_ACCESS_KEY']
+).buckets[ENV['S3_BUCKET_NAME']]
 
 helpers do
   # Basic Auth helpers
