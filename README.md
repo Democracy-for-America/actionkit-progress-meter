@@ -56,4 +56,4 @@ http://actionkit-progress-meter.herokuapp.com/4840/575847f70ffe145a0dc7ffcf4ff37
 Hint:
 ---------------
 
-To quickly find the URL of a page's progress meter with the valid MD5 hash, simply visit http://actionkit-progress-meter.herokuapp.com/show/[:page_id]/[:goal_type]/[:goal]/baseball_bat (Password-protected via Basic HTTP Authentication. Credentials may be set by editing the .env file.)
+To quickly look up the URL of a page's progress meter with the valid MD5 hash, simply visit http://actionkit-progress-meter.herokuapp.com/lookup (Password-protected via Basic HTTP Authentication. Credentials may be set by editing the .env file.)

@@ -55,8 +55,9 @@ def render_image_and_save_to_s3(object)
   object.write(img)
 end
 
-get '/create' do
-  erb :create
+get '/lookup' do
+  protected!
+  erb :lookup
 end
 
 # Display the path for a page's progress meter
