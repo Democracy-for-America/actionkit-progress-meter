@@ -45,7 +45,7 @@ helpers do
     @goal = params['goal']
     @goal_type = params['goal_type']
     @progress = @results[@goal_type]
-    @percent = [99, 8 + 92 * @progress.to_i / @goal.to_i].min
+    @percent = [99, 45 + 54 * @progress.to_i / @goal.to_i].min
   end
 end
 

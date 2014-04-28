@@ -1,10 +1,23 @@
 <style>
+  body {font-family: serif;}
   #bat {
-  background: #ff0000;
-  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ff0000), color-stop(<%= @percent %>%,#ff0000), color-stop(<%= @percent %>%,#ffffff), color-stop(100%,#ffffff));
-  background: -webkit-linear-gradient(45deg, #ff0000 0%,#ff0000 <%= @percent %>%,#ffffff <%= @percent %>%,#ffffff 100%);
+  background: #d90000;
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0%,#d90000), color-stop(<%= @percent %>%,#d90000), color-stop(<%= @percent %>%,#E0B53B), color-stop(100%,#E0B53B));
+  }
+  #progress, #goal {
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    right: 95px;
+  }
+  #progress {
+    top: 60px;
+  }
+  #goal {
+    top: 0px;
   }
 </style>
-<p><img id="bat" src="<%= request.base_url %>/img/baseball_bat.png" style="background-color:#f00;"></p>
-<p><%= "#{@goal_type}: #{@progress}" %></p>
-<p>goal: <%= @goal %></p>
+<div style="position: relative; width: 222px;">
+  <img id="bat" src="<%= request.base_url %>/img/baseball_bat.png" style="background-color:#f00;">
+  <span id="goal"><%= "$" if @goal_type == 'dollars' %><%= @goal.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse %> &mdash;</span>
+</div>
