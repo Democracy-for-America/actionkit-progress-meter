@@ -30,6 +30,41 @@ Set-up:
     $ mv .env.example .env
     $ ruby app.rb
 
+Adding additional templates and images:
+---------------
+
+To create the progress meter, this application uses a png image with a transparent cut-out, overlaid on top of a background which fills up as a progress meter approaches its goal.
+
+To allow for a template to be re-used with minor variations in text, color, etc., each template may support multiple image overlays.
+
+Templates may be added to views/templates, as .erb files.
+
+A template is passed four variables, which may be used in generating the progress meter:
+
+    @goal (a numeric string)
+    @goal_type ('actions' or 'dollars')
+    @progress (a numeric string)
+    @percent (an integer)
+
+Images may be added to public/img/[template_name]. (Each image must be contained in a sub-directory corresponding to a template.)
+
+Example file structure:
+
+    views
+      templates
+        baseball_template.erb
+        soccer_template.erb
+    
+    public
+      img
+        baseball_template
+          pitcher.png
+          shortshop.png
+        soccer_template
+          goalie.png
+          referee.png
+
+
 Running on Heroku:
 ---------------
 
@@ -41,9 +76,9 @@ Running on Heroku:
 In Action:
 ---------------
 
-http://actionkit-progress-meter.herokuapp.com/4840/575847f70ffe145a0dc7ffcf4ff37fc3/actions/2000/baseball_bat.png
+http://actionkit-progress-meter.herokuapp.com/4840/575847f70ffe145a0dc7ffcf4ff37fc3/actions/2000/bat_template/baseball_bat.png
 
-(format: http://actionkit-progress-meter.herokuapp.com/[:page_id]/[:md5_hash]/[:goal_type]/[:goal]/baseball_bat.png)
+(format: http://actionkit-progress-meter.herokuapp.com/[:page_id]/[:md5_hash]/[:goal_type]/[:goal]/[:template]/[:image].png)
 
 `page_id` is the page_id of the ActionKit page to pull progress from.
 
