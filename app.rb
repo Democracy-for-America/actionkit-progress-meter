@@ -41,10 +41,10 @@ helpers do
     @time = Time.now
     @sanitized_page_id = params['page_id'].gsub(/[^0-9]/,'')
     @results = @@connection.query("SELECT p.created_at, COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_page p LEFT JOIN core_action a ON p.id = a.page_id LEFT JOIN core_order o ON a.id = o.action_id WHERE p.id = #{@sanitized_page_id}").first
-    @goal = params['goal'].gsub(/[^0-9]/,'')
+    @goal = params['goal'].gsub(/[^0-9]/,'').to_i
     @goal_type = ( ['actions','dollars'].include?(params['goal_type']) ? params['goal_type'] : 'actions' )
-    @progress = @results[@goal_type]
-    @percent = [99, @progress.to_i / @goal.to_i].min
+    @progress = @results[@goal_type].to_i
+    @percent = [99, @progress / @goal].min
     @template = ['templates', params['template']].join('/').to_sym
     @valid_hash = Digest::MD5.new.update("#{ENV['SALT']}#{@results['created_at']}#{@sanitized_page_id}#{params['template']}#{params['image']}").to_s
   end
