@@ -1,0 +1,37 @@
+<% @percent = [99, 45 + 54 * @progress.to_i / @goal.to_i].min %>
+
+<style>
+  html, body {margin: 0px; padding: 0px;}
+  body {font-family: serif;}
+  #bat {
+  background: #d90000;
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0%,#d90000), color-stop(<%= @percent %>%,#d90000), color-stop(<%= @percent %>%,#E0B53B), color-stop(100%,#E0B53B));
+  }
+  b {
+    font-size: 18px;
+    color: #d90000;
+  }
+  #progress, #goal {
+    font-family: "Arial Narrow";
+    font-size: 16px;
+    position: absolute;
+    text-align: right;
+  }
+  #progress {
+    top: 76px;
+    right: 34px;
+  }
+  #goal {
+    right: 38px;
+    top: 3px;
+  }
+</style>
+<div style="position: relative; width: 150px;">
+  <img id="bat" src='<%= "#{request.base_url}/img/#{ params['template'] }/#{ params['image'] }.png" %>' style="background-color:#f00;">
+  <span id="goal">
+    GOAL: <%= "$" if @goal_type == 'dollars' %><%= @goal.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse %>
+  </span>
+  <span id="progress">
+    Currently:&nbsp;<br/><b><%= "$" if @goal_type == 'dollars' %><%= @progress.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse %></b>
+  </span>
+</div>
