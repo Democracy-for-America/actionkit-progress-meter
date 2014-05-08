@@ -41,45 +41,43 @@ helpers do
     @time = Time.now
     @sanitized_page_id = params['page_id'].gsub(/[^0-9]/,'')
     @results = @@connection.query("SELECT p.created_at, COUNT(*) AS actions, SUM(o.total) AS dollars FROM core_page p LEFT JOIN core_action a ON p.id = a.page_id LEFT JOIN core_order o ON a.id = o.action_id WHERE p.id = #{@sanitized_page_id}").first
-    @valid_hash = Digest::MD5.new.update("#{ENV['SALT']}#{@results['created_at']}#{@sanitized_page_id}").to_s
-    @goal = params['goal']
-    @goal_type = params['goal_type']
+    @goal = params['goal'].gsub(/[^0-9]/,'')
+    @goal_type = ( ['actions','dollars'].include?(params['goal_type']) ? params['goal_type'] : 'actions' )
     @progress = @results[@goal_type]
-    @percent = [99, 45 + 54 * @progress.to_i / @goal.to_i].min
+    @percent = [99, @progress.to_i / @goal.to_i].min
+    @template = ['templates', params['template']].join('/').to_sym
+    @valid_hash = Digest::MD5.new.update("#{ENV['SALT']}#{@results['created_at']}#{@sanitized_page_id}#{params['template']}#{params['image']}").to_s
   end
 end
 
 # Render an image of an HTML template, and upload to S3
 def render_image_and_save_to_s3(object)
-  img = IMGKit.new(erb(:bat_template), width: 256, height: 384).to_png
+  dimensions = IO.read("public/img/#{params['template']}/#{params['image']}.png")[0x10..0x18].unpack('NN')
+  img = IMGKit.new(erb(@template), width: dimensions[0], height: dimensions[1]).to_png
   object.write(img)
 end
 
 get '/lookup' do
   protected!
-  erb :lookup
+  files = Dir.glob('public/img/*/*')
+  @templates = files.map { |x| x.split('/')[2] }.uniq
+  @images = files.map { |x| x.split('/')[3].gsub('.png','') }.uniq
+  erb :'admin/lookup'
 end
 
 # Display the path for a page's progress meter
 get '/show' do
   protected!
   calculate_progress
-  erb :show
-end
-
-# Generate a custom progress meter using an HTML template
-get '/:page_id/:hash/:goal_type/:goal/baseball_bat' do
-  calculate_progress
-  valid_hash?
-  erb :bat_template
+  erb :'admin/show'
 end
 
 # Generate a .png from the HTML template
-get '/:page_id/:hash/:goal_type/:goal/baseball_bat.png' do
+get '/:page_id/:hash/:goal_type/:goal/:template/:image.png' do
   content_type 'image/png'
   calculate_progress
   valid_hash?
-  object = @@s3_bucket.objects["#{@sanitized_page_id}/#{@goal_type}/#{@goal}/baseball_bat.png"]
+  object = @@s3_bucket.objects["#{@sanitized_page_id}/#{@goal_type}/#{@goal}/#{params['template']}/#{params['image']}.png"]
   case
   when object.exists? == false
     # When the image doesn't exist, create it immediately
@@ -92,4 +90,12 @@ get '/:page_id/:hash/:goal_type/:goal/baseball_bat.png' do
     Thread.new { render_image_and_save_to_s3(object) }
   end
   redirect object.public_url
+end
+
+# Generate a custom progress meter using an HTML template
+get '/:page_id/:hash/:goal_type/:goal/:template/:image' do
+  dimensions = IO.read("public/img/#{params['template']}/#{params['image']}.png")[0x10..0x18].unpack('NN')
+  calculate_progress
+  valid_hash?
+  erb @template
 end
