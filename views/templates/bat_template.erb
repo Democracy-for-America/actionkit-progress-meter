@@ -27,7 +27,7 @@
   }
 </style>
 <div style="position: relative; width: 150px;">
-  <img id="bat" src='<%= "#{request.base_url}/img/#{ params['template'] }/#{ params['image'] }.png" %>' style="background-color:#f00;">
+  <img id="bat" src='<%= @progress < @goal ? "#{request.base_url}/img/#{ params['template'] }/#{ params['image'] }.png" : "#{request.base_url}/img/#{ params['template'] }/we_did_it.png" %>' style="background-color:#f00;">
   <span id="goal">
     GOAL: <%= "$" if @goal_type == 'dollars' %><%= @goal.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse %>
   </span>
