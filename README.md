@@ -76,7 +76,7 @@ Running on Heroku:
 In Action:
 ---------------
 
-actionkit-progress-meter.herokuapp.com/504/3ecaa3e88721b5bdd60a6650dbb71018/actions/100000/bat_template/baseball_bat.png
+http://actionkit-progress-meter.herokuapp.com/504/3ecaa3e88721b5bdd60a6650dbb71018/actions/100000/bat_template/baseball_bat.png
 
 (format: http://actionkit-progress-meter.herokuapp.com/[:page_id]/[:md5_hash]/[:goal_type]/[:goal]/[:template]/[:image].png)
 
